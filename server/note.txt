@@ -35,3 +35,10 @@ GET /save?id=9062300500&fieldName=status&fieldVal=online
 
 Fetch:
 GET /fetch?id=9062300500
+
+===========================================
+Save:
+https://luggagetracking.vercel.app/save?id=9062300500&fieldName=status&fieldVal=online
+
+Fetch:
+https://luggagetracking.vercel.app/fetch?id=9062300500
