@@ -3,6 +3,8 @@
 
 // ThingSpeak server
 const char server[] = "api.thingspeak.com";
+// const char server[] = "44.240.16.105"; // ✅ current IP of api.thingspeak.com (Aug 2025)
+
 const int port = 80;
 
 // Your ThingSpeak API Key
@@ -28,11 +30,14 @@ void setup()
   sim800.begin(9600, SERIAL_8N1, MODEM_RX, MODEM_TX);
   delay(3000);
 
+  modem.init(); // optional but helpful
+  delay(1000);
+
+  // Serial.print("🔍 Resolving DNS for server: ");
+  // Serial.println(modem.resolveName(server));
+
   Serial.println("🔄 Restarting modem...");
   modem.restart();
-
-  delay(1000);
-  modem.init(); // optional but helpful
 
   Serial.print("🔎 SIM status: ");
   Serial.println(modem.getSimStatus());
@@ -72,7 +77,25 @@ void setup()
   String url = "/update?api_key=16FCSO4YK6LKRO3G&field1=89&field2=92";
 
   Serial.println("📤 Sending data to ThingSpeak...");
-  if (client.connect(server, port))
+  Serial.print("🌐 Connecting to ");
+  Serial.print(server);
+  Serial.print(":");
+  Serial.println(port);
+
+  bool connected = false;
+  int attempts = 0;
+  while (!connected && attempts < 3)
+  {
+    connected = client.connect(server, port);
+    if (!connected)
+    {
+      Serial.println("❌ Connection attempt failed. Retrying...");
+      delay(2000);
+      attempts++;
+    }
+  }
+
+  if (connected)
   {
     client.println("GET " + url + " HTTP/1.1");
     client.println("Host: api.thingspeak.com");
