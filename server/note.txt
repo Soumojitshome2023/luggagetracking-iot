@@ -42,3 +42,6 @@ https://luggagetracking.vercel.app/save?id=9062300500&fieldName=status&fieldVal=
 
 Fetch:
 https://luggagetracking.vercel.app/fetch?id=9062300500
+
+
+http://odd-term-748c.soumojitshome2021.workers.dev/fetch?id=9062300500

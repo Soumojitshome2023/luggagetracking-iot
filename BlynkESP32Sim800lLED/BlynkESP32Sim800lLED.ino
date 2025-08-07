@@ -13,8 +13,8 @@
 // ✅ Blynk & SIM Credentials
 // ----------------------------------
 
-char auth[] = "cUyc1Qh-H9bgtD3oTXqMzxsz425Yo5t1";  // Your Blynk auth token
-char apn[]  = "bsnlnet";  // For BSNL SIM
+char auth[] = "cUyc1Qh-H9bgtD3oTXqMzxsz425Yo5t1"; // Your Blynk auth token
+char apn[] = "bsnlnet";                           // For BSNL SIM
 char user[] = "";
 char pass[] = "";
 
@@ -27,9 +27,9 @@ char pass[] = "";
 #define MODEM_RX 16
 #define MODEM_BAUD 9600
 
-HardwareSerial sim800(1);         // UART1
-TinyGsm modem(sim800);            // GSM Modem
-TinyGsmClient client(modem);      // GSM Client for Blynk
+HardwareSerial sim800(1);    // UART1
+TinyGsm modem(sim800);       // GSM Modem
+TinyGsmClient client(modem); // GSM Client for Blynk
 
 // ----------------------------------
 // ✅ LED Pin (Built-in)
@@ -37,7 +37,8 @@ const int ledPin = 2;
 
 // ----------------------------------
 // ✅ Blynk Virtual Pin to control LED
-BLYNK_WRITE(V0) {
+BLYNK_WRITE(V0)
+{
   int value = param.asInt();
   digitalWrite(ledPin, value);
   Serial.println(value ? "🔆 LED ON" : "🌑 LED OFF");
@@ -45,36 +46,53 @@ BLYNK_WRITE(V0) {
 
 // ----------------------------------
 // ✅ Setup Function
-void setup() {
-  // Start serial
+void setup()
+{
   Serial.begin(115200);
   delay(100);
   Serial.println("\n🚀 Starting Blynk via SIM800L...");
 
-  // LED setup
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
 
-  // Begin SIM800L Serial
   sim800.begin(MODEM_BAUD, SERIAL_8N1, MODEM_RX, MODEM_TX);
   delay(3000);
 
-  // Restart modem
   Serial.println("📶 Restarting modem...");
   modem.restart();
   delay(1000);
 
-  // Optional: Print modem info
+  Serial.print("📶 Signal Strength: ");
+  Serial.println(modem.getSignalQuality());
+
   Serial.print("📟 Modem Info: ");
   Serial.println(modem.getModemInfo());
 
-  // Start Blynk over GSM
-  Serial.println("🌐 Connecting to Blynk...");
-  Blynk.begin(auth, modem, apn, user, pass);
+  if (!modem.gprsConnect(apn, user, pass))
+  {
+    Serial.println("❌ GPRS Connection Failed");
+  }
+  else
+  {
+    Serial.println("✅ GPRS Connected");
+  }
+
+  // ⚠️ Correct usage: pass `modem`, not `client`
+  Blynk.config(modem, auth, "139.59.206.133", 80);
+
+  if (Blynk.connect())
+  {
+    Serial.println("✅ Blynk Connected");
+  }
+  else
+  {
+    Serial.println("❌ Blynk Connection Failed");
+  }
 }
 
 // ----------------------------------
 // ✅ Loop Function
-void loop() {
+void loop()
+{
   Blynk.run();
 }
