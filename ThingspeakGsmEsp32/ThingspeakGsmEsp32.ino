@@ -31,6 +31,9 @@ void setup()
   Serial.println("🔄 Restarting modem...");
   modem.restart();
 
+  delay(1000);
+  modem.init(); // optional but helpful
+
   Serial.print("🔎 SIM status: ");
   Serial.println(modem.getSimStatus());
 
@@ -65,21 +68,17 @@ void setup()
   float value1 = 23.45; // Example value
   float value2 = 67.89; // Optional second value
 
-  String url = "/update?api_key=" + apiKey + "&field1=" + String(value1) + "&field2=" + String(value2);
+  // String url = "/update?api_key=" + apiKey + "&field1=" + String(value1) + "&field2=" + String(value2);
+  String url = "/update?api_key=16FCSO4YK6LKRO3G&field1=89&field2=92";
 
   Serial.println("📤 Sending data to ThingSpeak...");
   if (client.connect(server, port))
   {
-    client.print("GET ");
-    client.print(url);
-    client.println(" HTTP/1.1");
-
-    client.print("Host: ");
-    client.println(server);
-
+    client.println("GET " + url + " HTTP/1.1");
+    client.println("Host: api.thingspeak.com");
     client.println("User-Agent: ESP32-SIM800L");
     client.println("Connection: close");
-    client.println(); // <--- Required blank line
+    client.println(); // Very important
 
     // Wait and read response
     unsigned long timeout = millis();
