@@ -53,7 +53,7 @@ void setup()
   }
   Serial.println("✅ GPRS connected");
 
-  sendDataToThingSpeak(89.0, 92.0); // 🟢 You can pass any values here
+  sendDataToThingSpeak(10.0, 11.0); // 🟢 You can pass any values here
 }
 
 void loop()
