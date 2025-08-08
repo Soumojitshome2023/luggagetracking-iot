@@ -1,47 +1,63 @@
-#include <WiFi.h>
+#define BLYNK_TEMPLATE_ID "TMPL3BpZKCI0d"
+#define BLYNK_TEMPLATE_NAME "Distance Monitor"
+#define BLYNK_AUTH_TOKEN "q-6KHbsS4BF6F5LHfMjgGH2bcJ0JkE-0"
 
-// Change to your mobile hotspot credentials
-const char* ssid = "Soumojit Shome";
-const char* password = "soumojit9062300@";
+#include <WiFi.h>
+#include <WiFiClient.h>
+#include <BlynkSimpleEsp32.h>
+
+// Mobile hotspot credentials
+char ssid[] = "Soumojit Shome";
+char pass[] = "soumojit9062300@";
 
 // Buzzer pin (D4 on ESP32)
 #define BUZZER_PIN 4
 
-void setup() {
-  Serial.begin(115200);
-  pinMode(BUZZER_PIN, OUTPUT);
-  digitalWrite(BUZZER_PIN, LOW);  // buzzer OFF initially
+BlynkTimer timer;
 
-  WiFi.begin(ssid, password);
-  Serial.println("Connecting to hotspot...");
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-
-  Serial.println("\nConnected to hotspot!");
-}
-
-void loop() {
+void sendDistanceToBlynk() {
   long rssi = WiFi.RSSI();  // Signal strength in dBm
 
-  // Path-loss model formula (2.0~4.0 is environment factor)
+  // Path-loss model formula (n = 2.0 is environment factor)
   float distance = pow(10.0, ((-69 - rssi) / (10 * 2.0)));
 
   Serial.print("RSSI: ");
   Serial.print(rssi);
   Serial.print(" dBm | Approx Distance: ");
-  Serial.print(distance, 4);  // show 4 decimal places
+  Serial.print(distance, 4);
   Serial.println(" meters");
 
-  // If distance less than 0.02 meters (~2 cm), start buzzer
-  if (distance > 1) {
-    digitalWrite(BUZZER_PIN, HIGH);  // buzzer ON
+  // Send RSSI & distance to Blynk
+  Blynk.virtualWrite(V0, rssi);
+  Blynk.virtualWrite(V1, distance);
+
+  // Buzzer logic
+  if (distance > 1) { // Less than or equal to 1 meter
+    digitalWrite(BUZZER_PIN, HIGH);
   } else {
-    digitalWrite(BUZZER_PIN, LOW);  // buzzer OFF
+    digitalWrite(BUZZER_PIN, LOW);
   }
+}
 
+// Manual buzzer control from Blynk button (V2)
+BLYNK_WRITE(V2) {
+  int value = param.asInt(); // 0 = OFF, 1 = ON
+  digitalWrite(BUZZER_PIN, value);
+}
 
-  delay(700);
+void setup() {
+  Serial.begin(115200);
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
+
+  // Connect to Blynk
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+
+  // Send every 1 second
+  timer.setInterval(1000L, sendDistanceToBlynk);
+}
+
+void loop() {
+  Blynk.run();
+  timer.run();
 }
