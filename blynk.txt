@@ -1,3 +1,8 @@
 #define BLYNK_TEMPLATE_ID "TMPL3vvuCh4AM"
 #define BLYNK_TEMPLATE_NAME "Test"
+
+
+
+#define BLYNK_TEMPLATE_ID "TMPL3D_ifJCzX"
+#define BLYNK_TEMPLATE_NAME "Distance Monitor"
 #define BLYNK_AUTH_TOKEN "cUyc1Qh-H9bgtD3oTXqMzxsz425Yo5t1"
